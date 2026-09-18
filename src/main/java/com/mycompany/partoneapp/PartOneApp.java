@@ -15,7 +15,7 @@ public class PartOneApp {
     public static void main(String[] args) {
          Scanner input = new Scanner(System.in);
 
-        System.out.println("----------Registration----------");
+        System.out.println("-----------Registration-----------");
 
         System.out.println("Enter your first name");
         String firstName = input.nextLine();
