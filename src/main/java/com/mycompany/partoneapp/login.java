@@ -77,10 +77,14 @@ public class login {
 
     public String returnLoginStatus() {
         if (loginStatus) {
-            return "Welcome " + firstName + " " + lastName + " it is great to see you again!a";
+            return "Welcome " + firstName + ", " + lastName + " it is great to see you again.";
         } else {
             return "Username or password incorrect, please try again.";
         }
+    }
+
+    public Object returnLoginStatusFailed() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
     
