@@ -7,13 +7,13 @@ package com.mycompany.partoneapp;
 import java.util.Scanner;
 
 /**
- 
+ *
  * @author ananny
  */
 public class PartOneApp {
 
     public static void main(String[] args) {
-         Scanner input = new Scanner(System.in);
+        Scanner input = new Scanner(System.in);
 
         System.out.println("-----------Registration-----------");
 
@@ -42,10 +42,112 @@ public class PartOneApp {
 
             login.loginUser(enteredUserName, enteredPassword);
             System.out.println(login.returnLoginStatus());
+
+            // Part 2: messages can only be sent once the user has logged in successfully
+            if (login.loginStatus) {
+                runQuickChat(input);
+            }
         }
 
         input.close();
     }
-}
-    
 
+    // Part 2: the QuickChat menu
+    private static void runQuickChat(Scanner input) {
+        System.out.println("Welcome to QuickChat.");
+
+        int maxMessages = readNumber(input, "How many messages would you like to enter?", 1, Integer.MAX_VALUE);
+        int entered = 0;
+        boolean running = true;
+
+        while (running) {
+            System.out.println("\nChoose an option:");
+            System.out.println("1) Send Messages");
+            System.out.println("2) Show recently sent messages");
+            System.out.println("3) Quit");
+            int option = readNumber(input, "", 1, 3);
+
+            if (option == 1) {
+                if (entered >= maxMessages) {
+                    System.out.println("You have already entered all " + maxMessages + " messages.");
+                } else {
+                    while (entered < maxMessages) {
+                        captureMessage(input, entered);
+                        entered++;
+                    }
+                    System.out.println("\nTotal number of messages sent: " + Message.returnTotalMessages());
+                }
+            } else if (option == 2) {
+                System.out.println("Coming Soon.");
+            } else {
+                System.out.println("Goodbye.");
+                running = false;
+            }
+        }
+    }
+
+    // Captures one message from the user and handles send / disregard / store
+    private static void captureMessage(Scanner input, int messageNumber) {
+        System.out.println("\nMessage " + (messageNumber + 1));
+
+        String recipient;
+        while (true) {
+            System.out.println("Enter the recipient's cell phone number (with international code)");
+            recipient = input.nextLine().trim();
+            String check = new Message("0000000000", 0, recipient, "x").checkRecipientCell();
+            System.out.println(check);
+            if (check.equals(Message.CELL_OK)) {
+                break;
+            }
+        }
+
+        Message message;
+        while (true) {
+            System.out.println("Enter your message (maximum 250 characters)");
+            String text = input.nextLine();
+            if (text.trim().isEmpty()) {
+                System.out.println("A message cannot be empty.");
+                continue;
+            }
+            message = new Message(Message.generateMessageID(), messageNumber, recipient, text);
+            String lengthCheck = message.checkMessageLength();
+            System.out.println(lengthCheck);
+            if (lengthCheck.equals(Message.READY)) {
+                break;
+            }
+        }
+        System.out.println("Message ID generated: " + message.getMessageID());
+
+        System.out.println("\n1) Send Message");
+        System.out.println("2) Disregard Message");
+        System.out.println("3) Store Message to send later");
+        int choice = readNumber(input, "", 1, 3);
+        System.out.println(message.sentMessage(choice));
+
+        if (choice == 1) {
+            System.out.println("\n" + message.details());
+        } else if (choice == 2) {
+            readNumber(input, "", 0, 0);
+            System.out.println("Message deleted.");
+        }
+    }
+
+    // Keeps asking until the user enters a whole number between min and max
+    private static int readNumber(Scanner input, String prompt, int min, int max) {
+        while (true) {
+            if (!prompt.isEmpty()) {
+                System.out.println(prompt);
+            }
+            String line = input.nextLine().trim();
+            try {
+                int value = Integer.parseInt(line);
+                if (value >= min && value <= max) {
+                    return value;
+                }
+            } catch (NumberFormatException e) {
+                // fall through to the message below
+            }
+            System.out.println("Please enter a valid number.");
+        }
+    }
+}
