@@ -4,6 +4,8 @@
  */
 
 import com.mycompany.partoneapp.login;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,104 +14,127 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author anann
  */
 public class loginTest {
+
+    // Test data from the brief
+    private static final String USER = "kyl_1";
+    private static final String PASS = "Ch&&sec@ke99!";
+    private static final String CELL = "+27838968976";
+
+    private login newLogin(String user, String pass, String cell) {
+        return new login(user, pass, cell, "Mutondwa", "Munyai");
+    }
+
+    // registerUser() prints the "successfully captured" lines, so capture the console output
+    private String[] printedLines(login l) {
+        PrintStream original = System.out;
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(buffer));
+        try {
+            l.registerUser();
+        } finally {
+            System.setOut(original);
+        }
+        return buffer.toString().split("\\R");
+    }
+
     // ---------- checkUserName() ----------
     @Test
     public void testCheckUserNameValid() {
-        login login = new login("kyl_1", "Ch&cK@ke99!", "+27768978651", "Mutondwa", "Munyai");
-        assertTrue(login.checkUserName());
+        assertTrue(newLogin("kyl_1", PASS, CELL).checkUserName());
     }
 
     @Test
     public void testCheckUserNameInvalid() {
-        login login = new login("kyle!!!!!!", "Ch&cK@ke44!", "+27768978651", "Mutondwa", "Munyai");
-        assertFalse(login.checkUserName());
+        assertFalse(newLogin("kyle!!!!!!!", PASS, CELL).checkUserName());
     }
 
     // ---------- checkPasswordComplexity() ----------
     @Test
     public void testCheckPasswordComplexityValid() {
-        login login = new login("kyl_1", "Ch&cK@ke99!", "+27670986756", "Mutondwa", "Munyai");
-        assertTrue(login.checkPasswordComplexity());
+        assertTrue(newLogin(USER, "Ch&&sec@ke99!", CELL).checkPasswordComplexity());
     }
 
     @Test
     public void testCheckPasswordComplexityInvalid() {
-        login login = new login("kyl_1", "samuke", "+27768978651", "Mutondwa", "Munyai");
-        assertFalse(login.checkPasswordComplexity());
+        assertFalse(newLogin(USER, "password", CELL).checkPasswordComplexity());
     }
 
     // ---------- checkCellPhoneNumber() ----------
     @Test
     public void testCheckCellPhoneNumberValid() {
-        login login = new login("kyl_1", "Ch&cK@ke99!", "+27768978651", "Mutondwa", "Munyai");
-        assertTrue(login.checkCellPhoneNumber());
+        assertTrue(newLogin(USER, PASS, "+27838968976").checkCellPhoneNumber());
     }
 
     @Test
     public void testCheckCellPhoneNumberInvalid() {
-        login login = new login("kyl_1", "Ch&cK@ke99!", "0768978651", "Mutondwa", "Munyai");
-        assertFalse(login.checkCellPhoneNumber());
+        assertFalse(newLogin(USER, PASS, "08966553").checkCellPhoneNumber());
     }
 
     // ---------- registerUser() ----------
     @Test
     public void testRegisterUserSuccessful() {
-        login login = new login("kyl_1", "Ch&cK@ke99!", "+27768978651", "Mutondwa", "Munyai");
-        assertEquals("User successfully registered.", login.registerUser());
+        assertEquals("User successfully registered.", newLogin(USER, PASS, CELL).registerUser());
+    }
+
+    @Test
+    public void testUsernameSuccessfullyCaptured() {
+        assertEquals("Username successfully captured.", printedLines(newLogin(USER, PASS, CELL))[0]);
+    }
+
+    @Test
+    public void testPasswordSuccessfullyCaptured() {
+        assertEquals("Password successfully captured.", printedLines(newLogin(USER, PASS, CELL))[1]);
+    }
+
+    @Test
+    public void testCellPhoneSuccessfullyCaptured() {
+        assertEquals("Cell phone number successfully captured.", printedLines(newLogin(USER, PASS, CELL))[2]);
     }
 
     @Test
     public void testRegisterUserUsernameInvalid() {
-        login login = new login("kyle!!!!!!", "Ch&cK@ke99!", "+27768978651", "Mutondwa", "Munyai");
         assertEquals("Username is not correctly formatted; please ensure that your username "
                 + "contains an underscore and is no more than five characters in length.",
-                login.registerUser());
+                newLogin("kyle!!!!!!!", PASS, CELL).registerUser());
     }
 
     @Test
     public void testRegisterUserPasswordInvalid() {
-        login login = new login("kyl_1", "password", "+27768978651", "Mutondwa", "Munyai");
         assertEquals("Password is not correctly formatted; please ensure that the password "
                 + "contains at least eight characters, a capital letter, a number, and a special character.",
-                login.registerUser());
+                newLogin(USER, "password", CELL).registerUser());
     }
 
     @Test
     public void testRegisterUserCellPhoneInvalid() {
-        login login = new login("kyl_1", "Ch&cK@ke99!", "08966553", "Mutondwa", "Munyai");
         assertEquals("Cell phone number is incorrectly formatted or does not contain an "
                 + "international code; please correct the number and try again.",
-                login.registerUser());
+                newLogin(USER, PASS, "08966553").registerUser());
     }
 
     // ---------- loginUser() ----------
     @Test
     public void testLoginSuccessful() {
-        login login = new login("kyl_1", "Ch&cK@ke99!", "+27768978651", "Mutondwa", "Munyai");
-        assertTrue(login.loginUser("kyl_1", "Ch&cK@ke99!"));
+        assertTrue(newLogin(USER, PASS, CELL).loginUser(USER, PASS));
     }
 
     @Test
     public void testLoginFailed() {
-        login login = new login("kyl_1", "Ch&cK@ke99!", "+27768978651", "Mutondwa", "Munyai");
-        assertFalse(login.loginUser("wrong_username", "wrong_password"));
+        assertFalse(newLogin(USER, PASS, CELL).loginUser("wrong_username", "wrong_password"));
     }
 
     // ---------- returnLoginStatus() ----------
     @Test
     public void testReturnLoginStatusSuccessful() {
-        login login = new login("kyl_1", "Ch&cK@ke99!", "+27768978651", "Mutondwa", "Munyai");
-        login.loginUser("kyl_1", "Ch&cK@ke99!");
-         assertEquals("Welcome Mutondwa, Munyai it is great to see you again.", login.returnLoginStatus());
+        login l = newLogin(USER, PASS, CELL);
+        l.loginUser(USER, PASS);
+        assertEquals("Welcome Mutondwa, Munyai it is great to see you again.", l.returnLoginStatus());
     }
 
     @Test
     public void testReturnLoginStatusFailed() {
-        login login = new login("kyl_1", "Ch&cK@ke99!", "+27768978651", "Mutondwa", "Munyai");
-        login.loginUser("wrong_username", "wrong_password");
-        assertEquals("Username or password incorrect, please try again.", login.returnLoginStatus());
+        login l = newLogin(USER, PASS, CELL);
+        l.loginUser("wrong_username", "wrong_password");
+        assertEquals("Username or password incorrect, please try again.", l.returnLoginStatus());
     }
 }
-    
-    
-
