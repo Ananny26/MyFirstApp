@@ -8,19 +8,22 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+//unit test for message class
 public class MessageTest {
-    private static final String TEXT_1 = "Hi Mike, can you join us for dinner tonight";
-    private static final String TEXT_2 = "Hi Keegan, did you receive the payment";
+    private static final String TEXT_1 = "Hi Mike, can you join us for dinner tonight?";
+    private static final String TEXT_2 = "Hi Keegan, did you receive the payment?";
     private Message message1;
     private Message message2;
 
+    //runs before each test
     @BeforeEach
     public void setUp() {
         Message.resetAll();
         message1 = new Message("0012345678", 0, "+27718693002", TEXT_1);
         message2 = new Message("0198765432", 1, "08575975889", TEXT_2);
     }
-
+    
+    //tests
     @Test public void messageLengthSuccess() { assertEquals("Message ready to send.", message1.checkMessageLength()); }
     @Test public void messageLengthFailure() { Message tooLong = new Message("0012345678", 0, "+27718693002", "a".repeat(260)); assertEquals("Message exceeds 250 characters by 10; please reduce the size.", tooLong.checkMessageLength()); }
     @Test public void recipientCorrectlyFormatted() { assertEquals("Cell phone number successfully captured.", message1.checkRecipientCell()); }

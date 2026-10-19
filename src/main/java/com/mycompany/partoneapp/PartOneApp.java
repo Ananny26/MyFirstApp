@@ -11,6 +11,7 @@ import java.util.Scanner;
  * @author ananny
  */
 
+//runs registration, login and menu
 public class PartOneApp {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
@@ -26,10 +27,12 @@ public class PartOneApp {
         System.out.println("Enter your password");
         String password = input.nextLine();
 
+        //create login object with entered details
         login login = new login(userName, password, cellPhoneNumber, firstName, lastName);
         String registrationResult = login.registerUser();
         System.out.println(registrationResult);
 
+        //only allow login if registration is successful
         if (registrationResult.equals("User successfully registered.")) {
             System.out.println("----------Login----------");
             System.out.println("Enter your username");

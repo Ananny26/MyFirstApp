@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+//unit test for login class
 public class loginTest {
     private static final String USER = "kyl_1";
     private static final String PASS = "Ch&&sec@ke99!";
@@ -18,6 +19,7 @@ public class loginTest {
         return new login(user, pass, cell, "Mutondwa", "Munyai");
     }
 
+    //captures ptinted lines from registerYser() to test the success prints
     private String[] printedLines(login l) {
         PrintStream original = System.out;
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -26,6 +28,7 @@ public class loginTest {
         return buffer.toString().split("\\R");
     }
 
+    //tests
     @Test public void testCheckUserNameValid() { assertTrue(newLogin("kyl_1", PASS, CELL).checkUserName()); }
     @Test public void testCheckUserNameInvalid() { assertFalse(newLogin("kyle!!!!!!!", PASS, CELL).checkUserName()); }
     @Test public void testCheckPasswordComplexityValid() { assertTrue(newLogin(USER, "Ch&&sec@ke99!", CELL).checkPasswordComplexity()); }

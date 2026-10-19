@@ -11,10 +11,10 @@ import java.util.ArrayList;
 
 /**
  *
- * @author anann
+ * @author ananny
  */
 
-
+//handles one message at a time
 public class Message {
     public static final String CELL_OK = "Cell phone number successfully captured.";
     public static final String CELL_BAD = "Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.";
@@ -23,6 +23,7 @@ public class Message {
     public static final String DISREGARDED = "Press 0 to delete the message.";
     public static final String STORED = "Message successfully stored.";
 
+    //stored variables shared by all variables
     private static Random random = new Random();
     private static int totalMessages = 0;
 
