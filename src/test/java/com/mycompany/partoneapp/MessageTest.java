@@ -28,4 +28,7 @@ public class MessageTest {
     @Test public void messageHashTestCase1() { assertEquals("00:0:HITONIGHT", message1.createMessageHash()); }
     @Test public void messageHashTestCase2() { assertEquals("01:1:HIPAYMENT", message2.createMessageHash()); }
     @Test public void messageIDIsCreated() { String id = Message.generateMessageID(); assertEquals(10, id.length()); Message m = new Message(id, 0, "+27718693002", TEXT_1); assertEquals(id, m.getMessageID()); }
-    
+    @Test public void sentMessageOptions() { assertEquals("Message successfully sent.", message1.sentMessage(1)); assertEquals("Press 0 to delete the message.", message1.sentMessage(2)); assertEquals("Message successfully stored.", message1.sentMessage(3)); }
+    @Test public void messageIDLengthCheck() { assertTrue(message1.checkMessageID()); assertFalse(new Message("12345678901", 0, "+27718693002", TEXT_1).checkMessageID()); }
+    @Test public void totalNumberSentMatchesTestData() { message1.sentMessage(1); message2.sentMessage(2); assertEquals(1, Message.returnTotalMessages()); }
+}
