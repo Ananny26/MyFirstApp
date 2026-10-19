@@ -4,6 +4,11 @@
  */
 package com.mycompany.partoneapp;
 
+/**
+ *
+ * @author anann
+ */
+
 public class login {
     public String firstName;
     public String lastName;
@@ -36,21 +41,18 @@ public class login {
     }
 
     public String registerUser() {
-        if (checkUserName()) {
-            System.out.println("Username successfully captured.");
-        } else {
+        if (!checkUserName()) {
             return "Username is not correctly formatted; please ensure that your username contains an underscore and is no more than five characters in length.";
         }
-        if (checkPasswordComplexity()) {
-            System.out.println("Password successfully captured.");
-        } else {
+        System.out.println("Username successfully captured.");
+        if (!checkPasswordComplexity()) {
             return "Password is not correctly formatted; please ensure that the password contains at least eight characters, a capital letter, a number, and a special character.";
         }
-        if (checkCellPhoneNumber()) {
-            System.out.println("Cell phone number successfully captured.");
-        } else {
+        System.out.println("Password successfully captured.");
+        if (!checkCellPhoneNumber()) {
             return "Cell phone number is incorrectly formatted or does not contain an international code; please correct the number and try again.";
         }
+        System.out.println("Cell phone number successfully captured.");
         return "User successfully registered.";
     }
 

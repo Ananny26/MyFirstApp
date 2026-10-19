@@ -9,119 +9,97 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Message {
-    public String messageID;
-    public String recipient;
-    public String messageText;
-    public String messageHash;
-    public int messageNumber;
-    
-    public static ArrayList<String> sentMessages = new ArrayList<>();
-    public static ArrayList<String> storedJson = new ArrayList<>();
-    public static int totalMessages = 0;
+/**
+ *
+ * @author anann
+ */
 
-    public Message(int messageNumber, String recipient, String messageText) {
+
+public class Message {
+    public static final String CELL_OK = "Cell phone number successfully captured.";
+    public static final String CELL_BAD = "Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.";
+    public static final String READY = "Message ready to send.";
+    public static final String SENT = "Message successfully sent.";
+    public static final String DISREGARDED = "Press 0 to delete the message.";
+    public static final String STORED = "Message successfully stored.";
+
+    private static Random random = new Random();
+    private static int totalMessages = 0;
+
+    private String messageID;
+    private int messageNumber;
+    private String recipient;
+    private String messageText;
+    private String messageHash;
+
+    public Message(String messageID, int messageNumber, String recipient, String messageText) {
+        this.messageID = messageID;
         this.messageNumber = messageNumber;
         this.recipient = recipient;
         this.messageText = messageText;
-        this.messageID = generateMessageID();
         this.messageHash = createMessageHash();
     }
 
-    public Message() {}
-
-    public String generateMessageID() {
-        Random rand = new Random();
-        long id = 1000000000L + (long)(rand.nextDouble() * 9000000000L);
-        String s = String.valueOf(id);
-        if (s.length() > 10) s = s.substring(0, 10);
-        messageID = s;
-        return s;
+    public static String generateMessageID() {
+        String id = "";
+        for (int i = 0; i < 10; i++) {
+            id = id + random.nextInt(10);
+        }
+        return id;
     }
 
     public boolean checkMessageID() {
         return messageID.length() <= 10;
     }
 
-    public String checkRecipientCell(String cell) {
-        if (cell.matches("\\+27\\d{9,10}") && cell.length() <= 13) {
-            return "Cell phone number successfully captured.";
-        } else {
-            return "Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.";
-        }
-    }
-    
     public String checkRecipientCell() {
-        return checkRecipientCell(this.recipient);
+        login checker = new login("", "", recipient, "", "");
+        if (checker.checkCellPhoneNumber()) {
+            return CELL_OK;
+        }
+        return CELL_BAD;
+    }
+
+    public String checkMessageLength() {
+        if (messageText.length() <= 250) {
+            return READY;
+        }
+        int over = messageText.length() - 250;
+        return "Message exceeds 250 characters by " + over + "; please reduce the size.";
     }
 
     public String createMessageHash() {
-        String firstTwo = messageID.substring(0, 2);
-        String[] words = messageText.split("\\s+");
-        String first = words[0].toUpperCase().replaceAll("[^A-Z]", "");
-        String last = words[words.length-1].toUpperCase().replaceAll("[^A-Z]", "");
-        messageHash = firstTwo + ":" + messageNumber + ":" + first + last;
-        return messageHash;
+        String trimmed = messageText.trim();
+        int firstSpace = trimmed.indexOf(' ');
+        String firstWord = firstSpace == -1 ? trimmed : trimmed.substring(0, firstSpace);
+        int lastSpace = trimmed.lastIndexOf(' ');
+        String lastWord = lastSpace == -1 ? trimmed : trimmed.substring(lastSpace + 1);
+        firstWord = firstWord.replaceAll("[^A-Za-z0-9]", "");
+        lastWord = lastWord.replaceAll("[^A-Za-z0-9]", "");
+        String prefix = messageID.substring(0, 2);
+        return (prefix + ":" + messageNumber + ":" + firstWord + lastWord).toUpperCase();
     }
 
-    public String createMessageHash(String id, int num, String text) {
-        messageID = id;
-        messageNumber = num;
-        messageText = text;
-        return createMessageHash();
-    }
-
-    public String SentMessage(int choice) {
+    public String sentMessage(int choice) {
         if (choice == 1) {
-            sentMessages.add(printMessagesSingle());
             totalMessages++;
-            return "Message successfully sent.";
+            return SENT;
         } else if (choice == 2) {
-            return "Press 0 to delete the message.";
-        } else if (choice == 3) {
-            storeMessage();
-            return "Message successfully stored.";
-        }
-        return "Invalid choice.";
-    }
-
-    public String checkMessageLength(String message) {
-        if (message.length() <= 250) {
-            return "Message ready to send.";
+            return DISREGARDED;
         } else {
-            return "Message exceeds 250 characters by " + (message.length()-250) + ", please reduce number.";
+            return STORED;
         }
     }
 
-    public String printMessages() {
-        if (sentMessages.size() == 0) return "No messages sent.";
-        String all = "";
-        for (int i = 0; i < sentMessages.size(); i++) {
-            all = all + sentMessages.get(i) + "\n------------------\n";
-        }
-        return all;
+    public String details() {
+        return "Message ID: " + messageID + "\nMessage Hash: " + messageHash + "\nRecipient: " + recipient + "\nMessage: " + messageText;
     }
 
-    public String printMessagesSingle() {
-        return "MessageID: " + messageID + "\nMessageHash: " + messageHash + "\nRecipient: " + recipient + "\nMessage: " + messageText;
-    }
-
-    public int returnTotalMessagess() {
+    public static int returnTotalMessages() {
         return totalMessages;
     }
 
-    public void storeMessage() {
-        String json = "{\"MessageID\":\"" + messageID + "\",\"MessageHash\":\"" + messageHash + "\",\"Recipient\":\"" + recipient + "\",\"Message\":\"" + messageText + "\"}";
-        storedJson.add(json);
-        try {
-            FileWriter w = new FileWriter("storedMessages.json");
-            w.write("[\n");
-            for (int i = 0; i < storedJson.size(); i++) {
-                w.write(storedJson.get(i));
-                if (i < storedJson.size()-1) w.write(",\n");
-            }
-            w.write("\n]");
-            w.close();
-        } catch (IOException e) {}
-    }
+    public String getMessageID() { return messageID; }
+    public String getMessageHash() { return messageHash; }
+    public static void resetAll() { totalMessages = 0; }
 }
