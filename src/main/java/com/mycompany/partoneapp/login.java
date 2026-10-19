@@ -4,12 +4,7 @@
  */
 package com.mycompany.partoneapp;
 
-/**
- *
- * @author ananny
- */
 public class login {
-     // Variables
     public String firstName;
     public String lastName;
     public String cellPhoneNumber;
@@ -17,7 +12,6 @@ public class login {
     public String password;
     public boolean loginStatus;
 
-    // Constructor
     public login(String userName, String password, String cellPhoneNumber, String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -45,24 +39,18 @@ public class login {
         if (checkUserName()) {
             System.out.println("Username successfully captured.");
         } else {
-            return "Username is not correctly formatted; please ensure that your username "
-                    + "contains an underscore and is no more than five characters in length.";
+            return "Username is not correctly formatted; please ensure that your username contains an underscore and is no more than five characters in length.";
         }
-
         if (checkPasswordComplexity()) {
             System.out.println("Password successfully captured.");
         } else {
-            return "Password is not correctly formatted; please ensure that the password "
-                    + "contains at least eight characters, a capital letter, a number, and a special character.";
+            return "Password is not correctly formatted; please ensure that the password contains at least eight characters, a capital letter, a number, and a special character.";
         }
-
         if (checkCellPhoneNumber()) {
             System.out.println("Cell phone number successfully captured.");
         } else {
-            return "Cell phone number is incorrectly formatted or does not contain an "
-                    + "international code; please correct the number and try again.";
+            return "Cell phone number is incorrectly formatted or does not contain an international code; please correct the number and try again.";
         }
-
         return "User successfully registered.";
     }
 
@@ -82,10 +70,4 @@ public class login {
             return "Username or password incorrect, please try again.";
         }
     }
-
-    public Object returnLoginStatusFailed() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 }
-    
-

@@ -4,166 +4,124 @@
  */
 package com.mycompany.partoneapp;
 
+import java.util.Random;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
-/**
-/**
- *
- * @author ananny
- */
-
-
- /* a single QuickChat message, plus the sent and stored message lists.
- */
 public class Message {
+    public String messageID;
+    public String recipient;
+    public String messageText;
+    public String messageHash;
+    public int messageNumber;
+    
+    public static ArrayList<String> sentMessages = new ArrayList<>();
+    public static ArrayList<String> storedJson = new ArrayList<>();
+    public static int totalMessages = 0;
 
-    // Messages kept in one place so the app and the unit tests always agree
-    public static final String CELL_OK = "Cell phone number successfully captured.";
-    public static final String CELL_BAD = "Cell phone number is incorrectly formatted or does not contain "
-            + "an international code. Please correct the number and try again.";
-    public static final String READY = "Message ready to send.";
-    public static final String SENT = "Message successfully sent.";
-    public static final String DISREGARDED = "Press 0 to delete the message.";
-    public static final String STORED = "Message successfully stored.";
-
-    private static final Random RANDOM = new Random();
-    private static final List<Message> sentMessages = new ArrayList<>();
-    private static final List<Message> storedMessages = new ArrayList<>();
-    private static String jsonFilePath = "messages.json";
-
-    private final String messageID;
-    private final int messageNumber;
-    private final String recipient;
-    private final String messageText;
-    private final String messageHash;
-
-    public Message(String messageID, int messageNumber, String recipient, String messageText) {
-        this.messageID = messageID;
+    public Message(int messageNumber, String recipient, String messageText) {
         this.messageNumber = messageNumber;
         this.recipient = recipient;
         this.messageText = messageText;
+        this.messageID = generateMessageID();
         this.messageHash = createMessageHash();
     }
 
-    // Randomly generated ten-digit message ID
-    public static String generateMessageID() {
-        StringBuilder id = new StringBuilder();
-        for (int i = 0; i < 10; i++) {
-            id.append(RANDOM.nextInt(10));
-        }
-        return id.toString();
+    public Message() {}
+
+    public String generateMessageID() {
+        Random rand = new Random();
+        long id = 1000000000L + (long)(rand.nextDouble() * 9000000000L);
+        String s = String.valueOf(id);
+        if (s.length() > 10) s = s.substring(0, 10);
+        messageID = s;
+        return s;
     }
 
-    // The message ID must be no more than ten characters
     public boolean checkMessageID() {
-        return messageID != null && messageID.length() <= 10;
+        return messageID.length() <= 10;
     }
 
-    // Reuses the cell phone check from Part 1 (login.checkCellPhoneNumber)
+    public String checkRecipientCell(String cell) {
+        if (cell.matches("\\+27\\d{9,10}") && cell.length() <= 13) {
+            return "Cell phone number successfully captured.";
+        } else {
+            return "Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.";
+        }
+    }
+    
     public String checkRecipientCell() {
-        login cellChecker = new login("", "", recipient, "", "");
-        if (cellChecker.checkCellPhoneNumber()) {
-            return CELL_OK;
-        }
-        return CELL_BAD;
+        return checkRecipientCell(this.recipient);
     }
 
-    // A message may not be longer than 250 characters
-    public String checkMessageLength() {
-        if (messageText.length() <= 250) {
-            return READY;
-        }
-        int over = messageText.length() - 250;
-        return "Message exceeds 250 characters by " + over + "; please reduce the size.";
-    }
-
-    // Hash = first two digits of the ID : message number : FIRSTWORDLASTWORD (e.g. 00:0:HITONIGHT)
     public String createMessageHash() {
-        String[] words = messageText.trim().split("\\s+");
-        String firstWord = words[0].replaceAll("[^A-Za-z0-9]", "");
-        String lastWord = words[words.length - 1].replaceAll("[^A-Za-z0-9]", "");
-        String prefix = messageID.substring(0, Math.min(2, messageID.length()));
-        return (prefix + ":" + messageNumber + ":" + firstWord + lastWord).toUpperCase();
+        String firstTwo = messageID.substring(0, 2);
+        String[] words = messageText.split("\\s+");
+        String first = words[0].toUpperCase().replaceAll("[^A-Z]", "");
+        String last = words[words.length-1].toUpperCase().replaceAll("[^A-Z]", "");
+        messageHash = firstTwo + ":" + messageNumber + ":" + first + last;
+        return messageHash;
     }
 
-    // 1 = send, 2 = disregard, 3 = store to send later
-    public String sentMessage(int choice) {
-        switch (choice) {
-            case 1:
-                sentMessages.add(this);
-                return SENT;
-            case 2:
-                return DISREGARDED;
-            case 3:
-                storeMessage();
-                return STORED;
-            default:
-                return "Invalid option; please choose 1, 2 or 3.";
+    public String createMessageHash(String id, int num, String text) {
+        messageID = id;
+        messageNumber = num;
+        messageText = text;
+        return createMessageHash();
+    }
+
+    public String SentMessage(int choice) {
+        if (choice == 1) {
+            sentMessages.add(printMessagesSingle());
+            totalMessages++;
+            return "Message successfully sent.";
+        } else if (choice == 2) {
+            return "Press 0 to delete the message.";
+        } else if (choice == 3) {
+            storeMessage();
+            return "Message successfully stored.";
+        }
+        return "Invalid choice.";
+    }
+
+    public String checkMessageLength(String message) {
+        if (message.length() <= 250) {
+            return "Message ready to send.";
+        } else {
+            return "Message exceeds 250 characters by " + (message.length()-250) + ", please reduce number.";
         }
     }
 
-    // Full details of this message, in the order the brief asks for
-    public String details() {
-        return "Message ID: " + messageID
-                + "\nMessage Hash: " + messageHash
-                + "\nRecipient: " + recipient
-                + "\nMessage: " + messageText;
-    }
-
-    // Returns all the messages sent while the program is running
-    public static String printMessages() {
-        if (sentMessages.isEmpty()) {
-            return "No messages have been sent.";
+    public String printMessages() {
+        if (sentMessages.size() == 0) return "No messages sent.";
+        String all = "";
+        for (int i = 0; i < sentMessages.size(); i++) {
+            all = all + sentMessages.get(i) + "\n------------------\n";
         }
-        StringBuilder all = new StringBuilder();
-        for (Message m : sentMessages) {
-            all.append(m.details()).append("\n\n");
-        }
-        return all.toString().trim();
+        return all;
     }
 
-    // Returns the total number of messages sent
-    public static int returnTotalMessages() {
-        return sentMessages.size();
+    public String printMessagesSingle() {
+        return "MessageID: " + messageID + "\nMessageHash: " + messageHash + "\nRecipient: " + recipient + "\nMessage: " + messageText;
     }
 
-    // Writes every stored message to a JSON file
+    public int returnTotalMessagess() {
+        return totalMessages;
+    }
+
     public void storeMessage() {
-        storedMessages.add(this);
-        StringBuilder json = new StringBuilder("[\n");
-        for (int i = 0; i < storedMessages.size(); i++) {
-            Message m = storedMessages.get(i);
-            json.append("  {\n");
-            json.append("    \"messageID\": \"").append(escape(m.messageID)).append("\",\n");
-            json.append("    \"messageHash\": \"").append(escape(m.messageHash)).append("\",\n");
-            json.append("    \"recipient\": \"").append(escape(m.recipient)).append("\",\n");
-            json.append("    \"message\": \"").append(escape(m.messageText)).append("\"\n");
-            json.append("  }").append(i < storedMessages.size() - 1 ? "," : "").append("\n");
-        }
-        json.append("]\n");
-        try (FileWriter writer = new FileWriter(jsonFilePath)) {
-            writer.write(json.toString());
-        } catch (IOException e) {
-            System.out.println("Could not save to " + jsonFilePath + ": " + e.getMessage());
-        }
-    }
-
-    private static String escape(String s) {
-        return s.replace("\\", "\\\\").replace("\"", "\\\"")
-                .replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
-    }
-
-    public String getMessageID() { return messageID; }
-    public String getMessageHash() { return messageHash; }
-
-    // Used by the unit tests
-    public static void setJsonFilePath(String path) { jsonFilePath = path; }
-    public static void resetAll() {
-        sentMessages.clear();
-        storedMessages.clear();
+        String json = "{\"MessageID\":\"" + messageID + "\",\"MessageHash\":\"" + messageHash + "\",\"Recipient\":\"" + recipient + "\",\"Message\":\"" + messageText + "\"}";
+        storedJson.add(json);
+        try {
+            FileWriter w = new FileWriter("storedMessages.json");
+            w.write("[\n");
+            for (int i = 0; i < storedJson.size(); i++) {
+                w.write(storedJson.get(i));
+                if (i < storedJson.size()-1) w.write(",\n");
+            }
+            w.write("\n]");
+            w.close();
+        } catch (IOException e) {}
     }
 }

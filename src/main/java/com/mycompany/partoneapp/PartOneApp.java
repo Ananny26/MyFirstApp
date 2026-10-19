@@ -13,7 +13,7 @@ import java.util.Scanner;
 public class PartOneApp {
 
     public static void main(String[] args) {
-        Scanner input = new Scanner(System.in);
+         Scanner input = new Scanner(System.in);
 
         System.out.println("-----------Registration-----------");
 
@@ -63,8 +63,8 @@ public class PartOneApp {
         while (running) {
             System.out.println("\nChoose an option:");
             System.out.println("1) Send Messages");
-            System.out.println("2) Show recently sent messages");
-            System.out.println("3) Quit");
+                    System.out.println("2) Show recently sent messages");
+                    System.out.println("3) Quit");
             int option = readNumber(input, "", 1, 3);
 
             if (option == 1) {
@@ -98,7 +98,7 @@ public class PartOneApp {
             System.out.println(check);
             if (check.equals(Message.CELL_OK)) {
                 break;
-            }
+                            }
         }
 
         Message message;
@@ -107,8 +107,8 @@ public class PartOneApp {
             String text = input.nextLine();
             if (text.trim().isEmpty()) {
                 System.out.println("A message cannot be empty.");
-                continue;
-            }
+                                continue;
+                            }
             message = new Message(Message.generateMessageID(), messageNumber, recipient, text);
             String lengthCheck = message.checkMessageLength();
             System.out.println(lengthCheck);
@@ -129,25 +129,25 @@ public class PartOneApp {
         } else if (choice == 2) {
             readNumber(input, "", 0, 0);
             System.out.println("Message deleted.");
-        }
-    }
+                        }
+                    }
 
     // Keeps asking until the user enters a whole number between min and max
     private static int readNumber(Scanner input, String prompt, int min, int max) {
         while (true) {
             if (!prompt.isEmpty()) {
                 System.out.println(prompt);
-            }
+                }
             String line = input.nextLine().trim();
             try {
                 int value = Integer.parseInt(line);
                 if (value >= min && value <= max) {
                     return value;
-                }
+            }
             } catch (NumberFormatException e) {
                 // fall through to the message below
-            }
-            System.out.println("Please enter a valid number.");
         }
+            System.out.println("Please enter a valid number.");
     }
+}
 }
