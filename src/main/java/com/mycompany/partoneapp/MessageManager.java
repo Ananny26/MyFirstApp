@@ -4,13 +4,6 @@
  */
 package com.mycompany.partoneapp;
 
-/**
- *
- * @author anann
- */
-public class MessageManager {
-    package com.mycompany.partoneapp;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,6 +11,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+/**
+ *
+ * @author anann
+ */
+
 
 /**
  * Holds the arrays for Part 3: sent, disregarded and stored messages plus the
@@ -238,6 +236,4 @@ public class MessageManager {
         messageFlags.clear();
         sender = "";
     }
-}
-    
 }
