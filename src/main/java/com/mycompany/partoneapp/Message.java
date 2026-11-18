@@ -14,7 +14,9 @@ import java.util.ArrayList;
  * @author ananny
  */
 
-//handles one message at a time
+/**
+ * Handles one message at a time.
+ */
 public class Message {
     public static final String CELL_OK = "Cell phone number successfully captured.";
     public static final String CELL_BAD = "Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.";
@@ -22,8 +24,9 @@ public class Message {
     public static final String SENT = "Message successfully sent.";
     public static final String DISREGARDED = "Press 0 to delete the message.";
     public static final String STORED = "Message successfully stored.";
+    public static final String INVALID = "Invalid choice.";
 
-    //stored variables shared by all variables
+    // shared by all messages
     private static Random random = new Random();
     private static int totalMessages = 0;
 
@@ -41,12 +44,12 @@ public class Message {
         this.messageHash = createMessageHash();
     }
 
+    // builds a ten digit ID using string manipulation: a random number is
+    // padded with leading zeros to ten characters, then cut to length 10
     public static String generateMessageID() {
-        String id = "";
-        for (int i = 0; i < 10; i++) {
-            id = id + random.nextInt(10);
-        }
-        return id;
+        long number = (long) (random.nextDouble() * 10000000000L);
+        String id = String.format("%010d", number);
+        return id.substring(0, 10);
     }
 
     public boolean checkMessageID() {
@@ -81,26 +84,48 @@ public class Message {
         return (prefix + ":" + messageNumber + ":" + firstWord + lastWord).toUpperCase();
     }
 
+    // 1 = send, 2 = disregard, 3 = store; anything else is invalid.
+    // Each choice records the message in the matching array.
     public String sentMessage(int choice) {
         if (choice == 1) {
             totalMessages++;
+            MessageManager.add(this, MessageManager.SENT);
             return SENT;
         } else if (choice == 2) {
+            MessageManager.add(this, MessageManager.DISREGARDED);
             return DISREGARDED;
-        } else {
+        } else if (choice == 3) {
+            storeMessage();
             return STORED;
         }
+        return INVALID;
+    }
+
+    // adds this message to the stored array and saves all stored messages as JSON
+    public void storeMessage() {
+        MessageManager.add(this, MessageManager.STORED);
+        MessageManager.saveStoredToJson();
+    }
+
+    // details of every message sent while the program is running
+    public static String printMessages() {
+        return MessageManager.report(MessageManager.SENT);
     }
 
     public String details() {
-        return "Message ID: " + messageID + "\nMessage Hash: " + messageHash + "\nRecipient: " + recipient + "\nMessage: " + messageText;
+        return "Message ID: " + messageID + "\nMessage Hash: " + messageHash
+                + "\nRecipient: " + recipient + "\nMessage: " + messageText;
     }
 
-    public static int returnTotalMessages() {
-        return totalMessages;
-    }
-
+    public static int returnTotalMessages() { return totalMessages; }
+    public static int returnStoredCount() { return MessageManager.getStoredMessages().size(); }
     public String getMessageID() { return messageID; }
     public String getMessageHash() { return messageHash; }
-    public static void resetAll() { totalMessages = 0; }
+    public String getRecipient() { return recipient; }
+    public String getMessageText() { return messageText; }
+
+    public static void resetAll() {
+        totalMessages = 0;
+        MessageManager.reset();
+    }
 }
