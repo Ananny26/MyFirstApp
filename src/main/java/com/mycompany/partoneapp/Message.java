@@ -10,9 +10,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- *
+ 
  * @author ananny
  */
+
 
 /**
  * Handles one message at a time.
@@ -44,12 +45,16 @@ public class Message {
         this.messageHash = createMessageHash();
     }
 
-    // builds a ten digit ID using string manipulation: a random number is
-    // padded with leading zeros to ten characters, then cut to length 10
+    // builds a ten digit ID using a loop counter and string manipulation:
+    // each pass picks one random digit with substring and adds it to the ID
     public static String generateMessageID() {
-        long number = (long) (random.nextDouble() * 10000000000L);
-        String id = String.format("%010d", number);
-        return id.substring(0, 10);
+        String digits = "0123456789";
+        String id = "";
+        for (int i = 0; i < 10; i++) {
+            int pick = random.nextInt(10);
+            id = id + digits.substring(pick, pick + 1);
+        }
+        return id;
     }
 
     public boolean checkMessageID() {
@@ -129,3 +134,4 @@ public class Message {
         MessageManager.reset();
     }
 }
+
